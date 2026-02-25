@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro General de Datos Seguro</title>
+    <style>
+        :root {
+            --primary: #0f172a;
+            --secondary: #3b82f6;
+            --success: #10b981;
+            --danger: #dc2626;
+            --bg: #f8fafc;
+            --border: #e2e8f0;
+            --card-bg: #ffffff;
+        }
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            background-color: var(--bg);
+            color: var(--primary);
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 0;
+        }
+
+        .page-header {
+            text-align: center;
+            margin-bottom: 2rem;
+            max-width: 700px;
+        }
+        .page-header h1 {
+            color: var(--primary);
+            font-size: 2.2rem;
+            margin-bottom: 0.5rem;
+        }
+        .page-header p {
+            color: #64748b;
+            font-size: 1.1rem;
+            line-height: 1.5;
+            margin: 0;
+        }
+        .highlight {
+            color: var(--secondary);
+        }
+
+        .app-container {
+            background: white;
+            padding: 2.5rem;
+            border-radius: 12px;
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05);
+            width: 100%;
+            max-width: 700px;
+            box-sizing: border-box;
+        }
+        h2 { 
+            border-bottom: 2px solid var(--border); 
+            padding-bottom: 1rem; 
+            margin-top: 0;
+            font-size: 1.3rem;
+            color: #334155;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        .full-width { grid-column: 1 / -1; }
+        
+        input, textarea, select {
+            padding: 0.85rem;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 1rem;
+            font-family: inherit;
+            background-color: #fcfcfc;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+        input:focus, textarea:focus, select:focus {
+            border-color: var(--secondary);
+            background-color: #ffffff;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        
+        .btn-group { display: flex; gap: 1rem; margin-bottom: 2rem; }
+        button {
+            flex: 1;
+            padding: 0.85rem;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            color: white;
+            transition: transform 0.1s, opacity 0.2s;
+        }
+        button:active { transform: scale(0.98); }
+        button:hover { opacity: 0.9; }
+        
+        .btn-add { background: var(--secondary); }
+        .btn-calc { background: var(--success); }
+        .btn-list { background: var(--primary); }
+        
+        .registro-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-left: 5px solid var(--secondary);
+            border-radius: 8px;
+            padding: 1.2rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        /* NUEVO: Flexbox en el header para separar el título del botón eliminar */
+        .registro-header {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: var(--primary);
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* NUEVO: Estilos del botón eliminar */
+        .btn-delete {
+            background-color: transparent;
+            color: var(--danger);
+            border: 1px solid var(--danger);
+            border-radius: 4px;
+            padding: 4px 10px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            flex: none; /* Evita que crezca como los botones principales */
+        }
+        .btn-delete:hover {
+            background-color: var(--danger);
+            color: white;
+        }
+
+        .registro-body {
+            font-size: 0.95rem;
+            color: #475569;
+            line-height: 1.5;
+        }
+
+        .registro-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 5px;
+            padding-top: 10px;
+        }
+
+        .badge-impacto {
+            background: #e2e8f0;
+            color: #475569;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: bold;
+        }
+
+        .badge-costo {
+            background: #dcfce7;
+            color: #166534;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+
+        .badge-costo-negativo {
+            background: #fee2e2;
+            color: var(--danger);
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+        
+        #salida { margin-top: 1rem; }
+        .total-calculado { color: var(--success); text-align: right; font-size: 1.5rem; margin-top: 1rem;}
+        .total-negativo { color: var(--danger); text-align: right; font-size: 1.5rem; margin-top: 1rem;}
+    </style>
+</head>
+<body>
+
+<header class="page-header">
+    <h1>Sistema de <span class="highlight">Gestión de Impacto</span></h1>
+    <p>Registra, evalúa y administra las incidencias operativas de forma segura y eficiente.</p>
+</header>
+
+<div class="app-container">
+    <h2>Nuevo Registro</h2>
+
+    <div class="grid">
+        <input type="text" id="usuario" placeholder="Usuario (Ej. Gerardo)" maxlength="50">
+        
+        <select id="area">
+            <option value="">-- Seleccione un Área --</option>
+            <option value="Sistemas y Tecnología">Sistemas y Tecnología</option>
+            <option value="Recursos Humanos">Recursos Humanos</option>
+            <option value="Finanzas y Contabilidad">📊 Finanzas y Contabilidad</option>
+        </select>
+        
+        <textarea id="descripcion" class="full-width" placeholder="Descripción detallada de la incidencia (Mín. 30, Máx. 250 caracteres)" rows="3" minlength="30" maxlength="250"></textarea>
+        
+        <select id="impacto">
+            <option value="">-- Nivel de Impacto --</option>
+            <option value="Bajo">Bajo</option>
+            <option value="Medio">Medio</option>
+            <option value="Alto">Alto</option>
+            <option value="Crítico">Crítico</option>
+        </select>
+
+        <input type="number" id="costo" placeholder="Costo Estimado ($)" step="0.01">
+    </div>
+
+    <div class="btn-group">
+        <button class="btn-add" id="btnAgregar">Guardar Registro</button>
+        <button class="btn-calc" id="btnCalcular">Calcular Total</button>
+        <button class="btn-list" id="btnListar">Ver Registros</button>
+    </div>
+
+    <div id="salida"></div>
+</div>
+
+<script>
+    'use strict';
+
+    // Filtro para Usuario (solo letras y espacios)
+    document.getElementById('usuario').addEventListener('input', function() {
+        this.value = this.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '');
+    });
+
+    // Color rojo para costos negativos
+    document.getElementById('costo').addEventListener('input', function() {
+        if (parseFloat(this.value) < 0) {
+            this.style.color = 'var(--danger)';
+            this.style.borderColor = 'var(--danger)';
+        } else {
+            this.style.color = 'inherit';
+            this.style.borderColor = 'var(--secondary)';
+        }
+    });
+
+    class GestorRegistros {
+        constructor() {
+            // Cargar datos y asignar IDs si son registros antiguos que no lo tenían
+            let datosGuardados = JSON.parse(localStorage.getItem('datos_impacto')) || [];
+            this.registros = datosGuardados.map(reg => {
+                if (!reg.id) reg.id = Date.now() + Math.random(); // Asegura un ID para datos viejos
+                return reg;
+            });
+            
+            this.contenedorSalida = document.getElementById('salida');
+            this.inicializarEventos();
+            this.renderizarVista();
+        }
+
+        inicializarEventos() {
+            document.getElementById('btnAgregar').addEventListener('click', () => this.agregar());
+            document.getElementById('btnCalcular').addEventListener('click', () => this.calcular());
+            document.getElementById('btnListar').addEventListener('click', () => this.renderizarVista());
+        }
+
+        agregar() {
+            const usuario = document.getElementById('usuario').value.trim();
+            const area = document.getElementById('area').value; 
+            const descripcion = document.getElementById('descripcion').value.trim();
+            const impacto = document.getElementById('impacto').value;
+            const costoRaw = document.getElementById('costo').value;
+            const costo = parseFloat(costoRaw);
+
+            if (!usuario || !area || !descripcion || !impacto || isNaN(costo)) {
+                alert("Por favor, completa todos los campos correctamente.");
+                return;
+            }
+
+            const regexLetras = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/;
+            if (!regexLetras.test(usuario)) {
+                alert("El nombre de usuario solo debe contener letras y espacios.");
+                return;
+            }
+
+            if (descripcion.length < 30 || descripcion.length > 250) {
+                alert(`La descripción debe tener entre 30 y 250 caracteres.\nLlevas: ${descripcion.length} caracteres.`);
+                return;
+            }
+            const existe = this.registros.some(r => r.descripcion === descripcion && r.usuario === usuario);
+            if (existe) {
+                alert(" Este registro ya fue ingresado previamente.");
+                return;
+            }
+
+            // NUEVO: Generar un ID único basado en la fecha exacta
+            const nuevoRegistro = { 
+                id: Date.now(), 
+                usuario, 
+                area, 
+                descripcion, 
+                impacto, 
+                costo 
+            };
+
+            this.registros.push(nuevoRegistro);
+            this.guardarDatos();
+            this.limpiarFormulario();
+            this.renderizarVista();
+        }
+
+        // NUEVA FUNCIÓN: Eliminar un registro específico
+        eliminarRegistro(id) {
+            // Confirmación de seguridad
+            if (confirm("¿Estás seguro de que deseas eliminar permanentemente este registro?")) {
+                // Filtramos el array conservando todos los registros excepto el que tiene el ID coincidente
+                this.registros = this.registros.filter(reg => reg.id !== id);
+                this.guardarDatos();
+                this.renderizarVista(); // Actualiza la pantalla inmediatamente
+                
+                // Si la pantalla estaba mostrando el total calculado, queremos quitarlo para que no sea engañoso
+                // Al volver a renderizar, se quita automáticamente.
+            }
+        }
+
+        calcular() {
+            this.contenedorSalida.innerHTML = ""; 
+            const total = this.registros.reduce((acumulador, actual) => acumulador + actual.costo, 0);
+
+            const elementoTotal = document.createElement('h3');
+            elementoTotal.className = total < 0 ? 'total-negativo' : 'total-calculado';
+            elementoTotal.textContent = `Balance Total: $${total.toFixed(2)}`;
+            
+            this.contenedorSalida.appendChild(elementoTotal);
+        }
+
+        renderizarVista() {
+            this.contenedorSalida.innerHTML = ""; 
+
+            if (this.registros.length === 0) {
+                this.contenedorSalida.innerHTML = "<p style='text-align:center; color:#94a3b8; margin-top: 2rem;'>Aún no hay registros guardados. ¡Empieza agregando uno!</p>";
+                return;
+            }
+
+            this.registros.forEach(reg => {
+                const card = document.createElement('div');
+                card.className = 'registro-card';
+
+                const header = document.createElement('div');
+                header.className = 'registro-header';
+                
+                // Contenedor para el texto del header
+                const headerText = document.createElement('span');
+                headerText.textContent = ` ${reg.usuario} — ${reg.area}`;
+
+                // NUEVO: Botón de eliminar por cada tarjeta
+                const btnEliminar = document.createElement('button');
+                btnEliminar.className = 'btn-delete';
+                btnEliminar.textContent = 'Eliminar';
+                // Al hacer clic, enviamos el ID de esta tarjeta a la función eliminarRegistro
+                btnEliminar.onclick = () => this.eliminarRegistro(reg.id);
+
+                header.appendChild(headerText);
+                header.appendChild(btnEliminar); // Se añade al lado derecho del header
+
+                const body = document.createElement('div');
+                body.className = 'registro-body';
+                body.textContent = `📝 Detalles: ${reg.descripcion}`;
+
+                const footer = document.createElement('div');
+                footer.className = 'registro-footer';
+
+                const spanImpacto = document.createElement('span');
+                spanImpacto.className = 'badge-impacto';
+                spanImpacto.textContent = ` Impacto: ${reg.impacto}`;
+
+                const spanCosto = document.createElement('span');
+                spanCosto.className = reg.costo < 0 ? 'badge-costo-negativo' : 'badge-costo';
+                spanCosto.textContent = ` Costo: $${reg.costo.toFixed(2)}`;
+
+                footer.appendChild(spanImpacto);
+                footer.appendChild(spanCosto);
+                
+                card.appendChild(header);
+                card.appendChild(body);
+                card.appendChild(footer);
+                
+                this.contenedorSalida.appendChild(card);
+            });
+        }
+
+        guardarDatos() {
+            localStorage.setItem('datos_impacto', JSON.stringify(this.registros));
+        }
+
+        limpiarFormulario() {
+            ['usuario', 'area', 'descripcion', 'impacto', 'costo'].forEach(id => {
+                document.getElementById(id).value = '';
+            });
+            const inputCosto = document.getElementById('costo');
+            inputCosto.style.color = 'inherit';
+            inputCosto.style.borderColor = 'var(--border)';
+        }
+    }
+
+    const app = new GestorRegistros();
+</script>
+</body>
+</html>
